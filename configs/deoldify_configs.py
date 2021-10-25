@@ -1,15 +1,17 @@
 # custom_imports = dict(imports=['my_pipelines'], allow_failed_imports=False)
-# import deoldify
+import sys
+sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/configs')
 
 custom_imports = dict(
-    imports=['deoldify'],
+    imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
     allow_failed_imports=False)
 
 model = dict(
     type='DeOldify',
     encoder=dict(
-        type='ColorizationResNet101'
-        ),
+        type='ColorizationResNet',
+        num_layers=101,
+        pretrained=None),
     n_classes=3,
     blur=True,
     blur_final=True,
@@ -43,7 +45,10 @@ test_pipeline = [
         backend='pillow'
     ),
     dict(type='RescaleToZeroOne', keys=['gt_img']),
-
+    dict(
+        type='ChannelsFromOneToThree',
+        keys=['gt_img'],
+    ),
     dict(
         type='Normalize',
         keys=['gt_img'],
@@ -54,7 +59,8 @@ test_pipeline = [
         type='Collect',
         keys=['gt_img'],
         meta_keys=['gt_img_path']),
-    dict(type='ImageToTensor', keys=['gt_img']),
+    dict(type='ImageToTensor',
+         keys=['gt_img']),
 ]
 
 
