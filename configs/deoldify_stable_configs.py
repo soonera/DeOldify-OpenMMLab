@@ -43,9 +43,7 @@ model = dict(
 train_cfg = dict()
 test_cfg = dict()
 
-
 dataset_type = ''
-
 
 train_pipeline = []
 test_pipeline = [

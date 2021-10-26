@@ -5,7 +5,12 @@ from models.blocks import custom_conv_layer, batchnorm_2d
 
 @COMPONENTS.register_module()
 class MidConvLayer(nn.Module):
-    def __init__(self, norm_type: str = "NormSpectral", ni: int = 2048, **kwargs):
+    def __init__(
+            self,
+            norm_type: str = "NormSpectral",
+            ni: int = 2048,
+            **kwargs
+    ):
 
         super().__init__()
         extra_bn = norm_type == "NormSpectral"

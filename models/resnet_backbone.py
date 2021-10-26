@@ -20,7 +20,7 @@ class ColorizationResNet(ResNet):
         self.out_layers = out_layers
 
     def forward(self, x):
-        layers = [self.conv1, self.bn1, self.relu,
+        layers = [self.conv1, self.bn1, self.relu, self.maxpool,
                   self.layer1, self.layer2, self.layer3, self.layer4]
         shortcut_out = []
         for layer_idx, layer in enumerate(layers):
