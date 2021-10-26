@@ -5,7 +5,7 @@ from mmedit.models.registry import BACKBONES
 
 @BACKBONES.register_module()
 class ColorizationResNet(ResNet):
-    def __init__(self, num_layers, pretrained=None, out_layers=[2, 4, 5, 6]):
+    def __init__(self, num_layers, pretrained=None, out_layers=[2, 5, 6, 7]):
 
         if num_layers == 101:
             super().__init__(block=Bottleneck, layers=[3, 4, 23, 3], num_classes=1, zero_init_residual=True)
