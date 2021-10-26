@@ -8,8 +8,8 @@ from torch.nn.utils.spectral_norm import spectral_norm
 # from ..registry import MODELS
 from mmedit.models.registry import MODELS
 
-from blocks import (init_default, relu, SelfAttention, PixelShuffle_ICNR, SigmoidRange, res_block, icnr, batchnorm_2d,
-                    MergeLayer, ifnone)
+from models.blocks import (init_default, relu, SelfAttention, PixelShuffle_ICNR, SigmoidRange, res_block, icnr, batchnorm_2d,
+                           MergeLayer, ifnone)
 # from ..builder import build_backbone
 from mmedit.models.builder import build_backbone
 

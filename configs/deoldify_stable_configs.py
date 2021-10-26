@@ -1,6 +1,10 @@
 # custom_imports = dict(imports=['my_pipelines'], allow_failed_imports=False)
 import sys
-sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/configs')
+# sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/configs')
+sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/models')
+sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/apis')
+sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
+
 
 custom_imports = dict(
     imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
