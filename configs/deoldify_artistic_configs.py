@@ -3,17 +3,13 @@ sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/models')
 sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/apis')
 sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
 
-
-# custom_imports = dict(
-#     imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
-#     allow_failed_imports=False)
-
 custom_imports = dict(
-    imports=['deoldify', 'resnet_backbone', 'mid_layers', 'channels_from_one_to_three'],
+    imports=['deoldify', 'resnet_backbone', 'mid_layers',
+             'decoder_layers', 'post_layers', 'channels_from_one_to_three'],
     allow_failed_imports=False)
 
 model = dict(
-    type='DynamicUnetDeep',
+    type='DeOldify',
     encoder=dict(
         type='ColorizationResNet',
         num_layers=34,
@@ -24,7 +20,21 @@ model = dict(
         type='MidConvLayer',
         norm_type="NormSpectral",
         ni=512),
-    nf_factor=1.5)
+    decoder=dict(
+        type='UnetDeepDecoder',
+        self_attention=True,
+        x_in_c_list=[64, 64, 128, 256],
+        up_in_c_list=[512, 768, 768, 672],
+        nf_factor=1.5,
+        norm_type="NormSpectral"),
+    post_layers=dict(
+        type='PostLayer',
+        ni=300,
+        last_cross=True,
+        n_classes=3,
+        bottle=False,
+        norm_type="NormSpectral",
+        y_range=(-3.0, 3.0)))
 
 train_cfg = dict()
 test_cfg = dict()

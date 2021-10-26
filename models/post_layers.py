@@ -2,11 +2,11 @@ from mmedit.models.registry import COMPONENTS
 from typing import Tuple, Optional
 
 import torch
-from torch import Tensor, nn
-from torch.nn import functional as F
+from torch import nn
 
-from models.blocks import (relu, PixelShuffle_ICNR, SigmoidRange, res_block, batchnorm_2d,
-                           MergeLayer, custom_conv_layer, CustomPixelShuffle_ICNR)
+from models.blocks import (PixelShuffle_ICNR, SigmoidRange, res_block,
+                           MergeLayer, custom_conv_layer)
+
 
 @COMPONENTS.register_module()
 class PostLayer(nn.Module):

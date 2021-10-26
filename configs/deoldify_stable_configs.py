@@ -10,7 +10,7 @@ custom_imports = dict(
     allow_failed_imports=False)
 
 model = dict(
-    type='DynamicUnetWide',
+    type='DeOldify',
     encoder=dict(
         type='ColorizationResNet',
         num_layers=101,
