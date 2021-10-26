@@ -144,17 +144,16 @@ class UnetBlockDeep(nn.Module):
     ):
         super().__init__()
 
-        kwargs_1 = {'norm_type': "NormSpectral", 'extra_bn': True}
         up_out = up_in_c // 2
         self.shuf = CustomPixelShuffle_ICNR(
-            up_in_c, up_out, blur=blur, leaky=leaky, **kwargs_1
+            up_in_c, up_out, blur=blur, leaky=leaky, **kwargs
         )
         self.bn = batchnorm_2d(x_in_c)
         ni = up_out + x_in_c
         nf = int((ni if final_div else ni // 2) * nf_factor)
-        self.conv1 = custom_conv_layer(ni, nf, leaky=leaky, **kwargs_1)
+        self.conv1 = custom_conv_layer(ni, nf, leaky=leaky, **kwargs)
         self.conv2 = custom_conv_layer(
-            nf, nf, leaky=leaky, self_attention=self_attention, **kwargs_1
+            nf, nf, leaky=leaky, self_attention=self_attention, **kwargs
         )
         self.relu = relu(leaky=leaky)
 
@@ -171,19 +170,6 @@ class UnetBlockDeep(nn.Module):
 class DynamicUnetWide(nn.Module):
     "Create a U-Net from a given architecture."
 
-    # def __init__(
-    #         self,
-    #         encoder,
-    #         n_classes: int,
-    #         blur: bool = False,
-    #         self_attention: bool = False,
-    #         y_range: Optional[Tuple[float, float]] = None,  # SigmoidRange
-    #         last_cross: bool = True,
-    #         bottle: bool = False,
-    #         norm_type: str = "NormSpectral",
-    #         nf_factor: int = 1,
-    #         **kwargs
-    # ):
     def __init__(
             self,
             encoder,
@@ -199,7 +185,6 @@ class DynamicUnetWide(nn.Module):
     ):
         encoder = build_backbone(encoder)
 
-        nf = 512 * nf_factor
         extra_bn = norm_type == "NormSpectral"
 
         ni = 2048
@@ -228,6 +213,7 @@ class DynamicUnetWide(nn.Module):
             x_in_c = x_in_c_list[i]
             sa = self_attention and (i == len(sfs_idxs) - 3)
 
+            nf = 512 * nf_factor
             n_out = nf if not_final else nf // 2
 
             unet_block = UnetBlockWide(
@@ -272,13 +258,10 @@ class DynamicUnetWide(nn.Module):
         for layer, s in zip(self.layers_dec, [x4, x3, x2, x1]):
             res = layer(res, s)
 
-        for idx, layer in enumerate(self.layers_post):
-            if idx == 0:
-                res = layer(res)
-            elif idx == 1:
-                res = torch.cat([res, x], dim=1)
-            elif idx > 1:
-                res = layer(res)
+        res = self.layers_post[0](res)
+        res = torch.cat([res, x], dim=1)
+        for idx, layer in enumerate(self.layers_post[2:]):
+            res = layer(res)
 
         return res
 
@@ -288,25 +271,11 @@ class DynamicUnetWide(nn.Module):
 class DynamicUnetDeep(nn.Module):
     "Create a U-Net from a given architecture."
 
-    # def __init__(
-    #         self,
-    #         encoder,
-    #         n_classes: int,
-    #         blur: bool = False,
-    #         self_attention: bool = False,
-    #         y_range: Optional[Tuple[float, float]] = None,  # SigmoidRange
-    #         last_cross: bool = True,
-    #         bottle: bool = False,
-    #         norm_type: str = "NormSpectral",
-    #         nf_factor: int = 1,
-    #         **kwargs
-    # ):
     def __init__(
             self,
             encoder,
             n_classes: int = 3,
             blur: bool = True,
-            # blur_final = True,
             self_attention: bool = True,
             y_range: Optional[Tuple[float, float]] = (-3.0, 3.0),  # SigmoidRange
             last_cross: bool = True,
@@ -317,7 +286,6 @@ class DynamicUnetDeep(nn.Module):
     ):
         encoder = build_backbone(encoder)
 
-        # nf = 512 * nf_factor
         extra_bn = norm_type == "NormSpectral"
 
         ni = 512
@@ -337,8 +305,6 @@ class DynamicUnetDeep(nn.Module):
         layers_post = []
 
         sfs_idxs = [6, 5, 4, 2]
-        # x_in_c_list = [1024, 512, 256, 64]
-        # up_in_c_list = [2048, 512, 512, 512]
         x_in_c_list = [256, 128, 64, 64]
         up_in_c_list = [512, 768, 768, 672]
 
@@ -394,12 +360,9 @@ class DynamicUnetDeep(nn.Module):
         for layer, s in zip(self.layers_dec, [x4, x3, x2, x1]):
             res = layer(res, s)
 
-        for idx, layer in enumerate(self.layers_post):
-            if idx == 0:
-                res = layer(res)
-            elif idx == 1:
-                res = torch.cat([res, x], dim=1)
-            elif idx > 1:
-                res = layer(res)
+        res = self.layers_post[0](res)
+        res = torch.cat([res, x], dim=1)
+        for idx, layer in enumerate(self.layers_post[2:]):
+            res = layer(res)
 
         return res
