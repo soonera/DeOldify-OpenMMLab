@@ -7,7 +7,7 @@ sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
 
 
 custom_imports = dict(
-    imports=['DynamicUnetWide', 'resnet_backbone', 'channels_from_one_to_three'],
+    imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
     allow_failed_imports=False)
 
 model = dict(
