@@ -7,22 +7,15 @@ sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
 
 
 custom_imports = dict(
-    imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
+    imports=['DynamicUnetWide', 'resnet_backbone', 'channels_from_one_to_three'],
     allow_failed_imports=False)
 
 model = dict(
-    type='DeOldify',
+    type='DynamicUnetWide',
     encoder=dict(
         type='ColorizationResNet',
         num_layers=101,
         pretrained=None),
-    n_classes=3,
-    blur=True,
-    blur_final=True,
-    self_attention=True,
-    y_range=(-3.0, 3.0),
-    last_cross=True,
-    bottle=False,
     nf_factor=2
     )
 
