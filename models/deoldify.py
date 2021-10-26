@@ -126,6 +126,7 @@ class DynamicUnetDeep(nn.Module):
     def __init__(
             self,
             encoder,
+            mid_layers,
             n_classes: int = 3,
             blur: bool = True,
             self_attention: bool = True,
@@ -136,23 +137,30 @@ class DynamicUnetDeep(nn.Module):
             nf_factor: int = 1.5,
             **kwargs
     ):
-        encoder = build_backbone(encoder)
+        super().__init__()
+        self.layers_enc = build_backbone(encoder)
+        self.layers_mid = build_component(mid_layers)
+
+        # encoder = build_backbone(encoder)
+        # mid_layers = build_component(mid_layers)
 
         extra_bn = norm_type == "NormSpectral"
 
-        ni = 512
+        # ni = 512
         kwargs_0 = {}  # 自己加的
-        middle_conv = nn.Sequential(
-            custom_conv_layer(
-                ni, ni * 2, norm_type=norm_type, extra_bn=extra_bn, **kwargs_0
-            ),
-            custom_conv_layer(
-                ni * 2, ni, norm_type=norm_type, extra_bn=extra_bn, **kwargs_0
-            ),
-        ).eval()
+        # middle_conv = nn.Sequential(
+        #     custom_conv_layer(
+        #         ni, ni * 2, norm_type=norm_type, extra_bn=extra_bn, **kwargs_0
+        #     ),
+        #     custom_conv_layer(
+        #         ni * 2, ni, norm_type=norm_type, extra_bn=extra_bn, **kwargs_0
+        #     ),
+        # ).eval()
 
-        layers_enc = [encoder]
-        layers_mid = [batchnorm_2d(ni), nn.ReLU(), middle_conv]
+        # layers_enc = [encoder]
+
+        # layers_mid = [batchnorm_2d(ni), nn.ReLU(), middle_conv]
+        # layers_mid = [mid_layers]
         layers_dec = []
         layers_post = []
 
@@ -195,21 +203,23 @@ class DynamicUnetDeep(nn.Module):
         if y_range is not None:
             layers_post.append(SigmoidRange(*y_range))
 
-        super().__init__()
-        self.layers_enc = nn.ModuleList(layers_enc)
-        self.layers_mid = nn.ModuleList(layers_mid)
+        # self.layers_enc = nn.ModuleList(layers_enc)
+        # self.layers_mid = nn.ModuleList(layers_mid)
         self.layers_dec = nn.ModuleList(layers_dec)
         self.layers_post = nn.ModuleList(layers_post)
 
     def forward(self, x):
         res = x
 
-        [x1, x2, x3, x4, res] = self.layers_enc[0](res)
+        # [x1, x2, x3, x4, res] = self.layers_enc[0](res)
+        res, short_cut_out = self.layers_enc(res)
 
-        for layer in self.layers_mid:
-            res = layer(res)
+        # for layer in self.layers_mid:
+        #     res = layer(res)
+        res = self.layers_mid(res)
 
-        for layer, s in zip(self.layers_dec, [x4, x3, x2, x1]):
+        short_cut_out.reverse()
+        for layer, s in zip(self.layers_dec, short_cut_out):
             res = layer(res, s)
 
         res = self.layers_post[0](res)

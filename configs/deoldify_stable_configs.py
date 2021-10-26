@@ -27,7 +27,6 @@ model = dict(
         x_in_c_list=[64, 256, 512, 1024],
         ni=2048,
         nf_factor=2,
-        blur=True,
         norm_type="NormSpectral",),
     post_layers=dict(
         type='PostLayer',
@@ -37,7 +36,6 @@ model = dict(
         bottle=False,
         norm_type="NormSpectral",
         y_range=(-3.0, 3.0)),
-    nf_factor=2,
     )
 
 train_cfg = dict()

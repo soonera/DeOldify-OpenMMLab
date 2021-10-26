@@ -1,13 +1,15 @@
-# custom_imports = dict(imports=['my_pipelines'], allow_failed_imports=False)
 import sys
-# sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/configs')
 sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/models')
 sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/apis')
 sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
 
 
+# custom_imports = dict(
+#     imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
+#     allow_failed_imports=False)
+
 custom_imports = dict(
-    imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
+    imports=['deoldify', 'resnet_backbone', 'mid_layers', 'channels_from_one_to_three'],
     allow_failed_imports=False)
 
 model = dict(
@@ -15,7 +17,13 @@ model = dict(
     encoder=dict(
         type='ColorizationResNet',
         num_layers=34,
-        pretrained=None),
+        pretrained=None,
+        out_layers=[2, 5, 6, 7]),
+    mid_layers=dict(
+        # channel_factors=[2, 1],
+        type='MidConvLayer',
+        norm_type="NormSpectral",
+        ni=512),
     nf_factor=1.5)
 
 train_cfg = dict()
