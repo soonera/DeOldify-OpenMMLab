@@ -7,7 +7,7 @@ sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
 
 
 custom_imports = dict(
-    imports=['deoldify', 'resnet_backbone', 'channels_from_one_to_three'],
+    imports=['deoldify', 'resnet_backbone', 'mid_layers', 'channels_from_one_to_three'],
     allow_failed_imports=False)
 
 model = dict(
@@ -16,7 +16,13 @@ model = dict(
         type='ColorizationResNet',
         num_layers=101,
         pretrained=None),
-    nf_factor=2
+    mid_layers=dict(
+        # channel_factors=[2, 1],
+        type='MidConvLayer',
+        norm_type="NormSpectral",
+        ni=2048),
+    nf_factor=2,
+    shortcut_idxs_in_enc=[2, 4, 5, 6],
     )
 
 train_cfg = dict()

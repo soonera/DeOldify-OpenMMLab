@@ -16,7 +16,7 @@ model = dict(
         type='ColorizationResNet',
         num_layers=34,
         pretrained=None),
-    nf_factor=1.5
+    nf_factor=1.5,
     )
 
 

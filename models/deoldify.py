@@ -1,95 +1,14 @@
-from typing import Tuple, Callable, Optional
+from typing import Tuple, Optional
 import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
-from torch.nn.utils.weight_norm import weight_norm
-from torch.nn.utils.spectral_norm import spectral_norm
 
-# from ..registry import MODELS
 from mmedit.models.registry import MODELS
 
-from models.blocks import (init_default, relu, SelfAttention, PixelShuffle_ICNR, SigmoidRange, res_block, icnr, batchnorm_2d,
-                           MergeLayer, ifnone)
-# from ..builder import build_backbone
-from mmedit.models.builder import build_backbone
+from models.blocks import (relu, PixelShuffle_ICNR, SigmoidRange, res_block, batchnorm_2d,
+                           MergeLayer, custom_conv_layer, CustomPixelShuffle_ICNR)
 
-
-def custom_conv_layer(
-        ni: int,
-        nf: int,
-        ks: int = 3,
-        stride: int = 1,
-        padding: int = None,
-        bias: bool = None,
-        is_1d: bool = False,
-        norm_type: str = "NormBatch",
-        use_activ: bool = True,
-        leaky: float = None,
-        transpose: bool = False,
-        init: Callable = nn.init.kaiming_normal_,
-        self_attention: bool = False,
-        extra_bn: bool = False,
-):
-    "Create a sequence of convolutional (`ni` to `nf`), ReLU (if `use_activ`) and batchnorm (if `bn`) layers."
-    if padding is None:
-        padding = (ks - 1) // 2 if not transpose else 0
-    bn = norm_type in ("NormBatch", "NormBatchZero") or extra_bn == True
-
-    if bias is None:
-        bias = not bn
-
-    conv_func = nn.ConvTranspose2d if transpose else nn.Conv1d if is_1d else nn.Conv2d
-
-    conv = init_default(
-        conv_func(ni, nf, kernel_size=ks, bias=bias, stride=stride, padding=padding),
-        init,
-    )
-
-    if norm_type == "NormWeight":
-        conv = weight_norm(conv)
-    elif norm_type == "NormSpectral":
-        conv = spectral_norm(conv)
-
-    layers = [conv]
-    if use_activ:
-        layers.append(relu(True, leaky=leaky))
-    if bn:
-        layers.append((nn.BatchNorm1d if is_1d else nn.BatchNorm2d)(nf))
-    if self_attention:
-        layers.append(SelfAttention(nf))
-
-    return nn.Sequential(*layers)
-
-
-class CustomPixelShuffle_ICNR(nn.Module):
-    "Upsample by `scale` from `ni` filters to `nf` (default `ni`), using `nn.PixelShuffle`, `icnr` init, and `weight_norm`."
-
-    def __init__(
-            self,
-            ni: int,
-            nf: int = None,
-            scale: int = 2,
-            blur: bool = False,
-            leaky: float = None,
-            **kwargs
-    ):
-        super().__init__()
-        nf = ifnone(nf, ni)
-        self.conv = custom_conv_layer(
-            ni, nf * (scale ** 2), ks=1, use_activ=False, **kwargs
-        )
-        icnr(self.conv[0].weight)
-        self.shuf = nn.PixelShuffle(scale)
-        # Blurring over (h*w) kernel
-        # "Super-Resolution using Convolutional Neural Networks without Any Checkerboard Artifacts"
-        # - https://arxiv.org/abs/1806.02658
-        self.pad = nn.ReplicationPad2d((1, 0, 1, 0))
-        self.blur = nn.AvgPool2d(2, stride=1)
-        self.relu = relu(True, leaky=leaky)
-
-    def forward(self, x):
-        x = self.shuf(self.relu(self.conv(x)))
-        return self.blur(self.pad(x)) if self.blur else x
+from mmedit.models.builder import build_backbone, build_component
 
 
 class UnetBlockWide(nn.Module):
@@ -173,6 +92,7 @@ class DynamicUnetWide(nn.Module):
     def __init__(
             self,
             encoder,
+            mid_layers,
             n_classes: int = 3,
             blur: bool = True,
             self_attention: bool = True,
@@ -181,38 +101,40 @@ class DynamicUnetWide(nn.Module):
             bottle: bool = False,
             norm_type: str = "NormSpectral",
             nf_factor: int = 2,
+            shortcut_idxs_in_enc=None,
             **kwargs
     ):
+        if shortcut_idxs_in_enc is None:
+            shortcut_idxs_in_enc = [2, 4, 5, 6]
         encoder = build_backbone(encoder)
+        mid_layers = build_component(mid_layers)
 
         extra_bn = norm_type == "NormSpectral"
 
-        ni = 2048
+        # ni = 2048
+        enc_out_channels = encoder.get_channels()
+        ni = enc_out_channels[-1]
         kwargs_0 = {}  # 自己加的
-        middle_conv = nn.Sequential(
-            custom_conv_layer(
-                ni, ni * 2, norm_type=norm_type, extra_bn=extra_bn, **kwargs_0
-            ),
-            custom_conv_layer(
-                ni * 2, ni, norm_type=norm_type, extra_bn=extra_bn, **kwargs_0
-            ),
-        ).eval()
 
         layers_enc = [encoder]
-        layers_mid = [batchnorm_2d(ni), nn.ReLU(), middle_conv]
+        layers_mid = [mid_layers]
         layers_dec = []
         layers_post = []
 
-        sfs_idxs = [6, 5, 4, 2]
-        x_in_c_list = [1024, 512, 256, 64]
-        up_in_c_list = [2048, 512, 512, 512]
+        shortcut_idxs_in_enc.reverse()
+        x_in_c_list = [enc_out_channels[i] for i in shortcut_idxs_in_enc]
 
-        for i in range(len(sfs_idxs)):
-            not_final = i != len(sfs_idxs) - 1
-            up_in_c = up_in_c_list[i]
+        # up_in_c_list = [2048, 512, 512, 512]
+        # up_in_c = 2048
+        up_in_c = ni
+        nums_shortcut = len(shortcut_idxs_in_enc)
+        for i in range(nums_shortcut):
+            not_final = i != nums_shortcut - 1
+            # up_in_c = up_in_c_list[i]
             x_in_c = x_in_c_list[i]
-            sa = self_attention and (i == len(sfs_idxs) - 3)
+            sa = self_attention and (i == nums_shortcut - 3)
 
+            # 这个512是原代码自带的
             nf = 512 * nf_factor
             n_out = nf if not_final else nf // 2
 
@@ -227,9 +149,11 @@ class DynamicUnetWide(nn.Module):
                 extra_bn=extra_bn,
                 **kwargs_0
             ).eval()
+            up_in_c = n_out // 2
             layers_dec.append(unet_block)
 
-        ni = 256
+        # ni = 256
+        ni = up_in_c
         layers_post.append(PixelShuffle_ICNR(ni, norm_type="NormWeight", **kwargs_0))
         if last_cross:
             layers_post.append(MergeLayer(dense=True))
