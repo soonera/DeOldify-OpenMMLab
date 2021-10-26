@@ -93,99 +93,27 @@ class DynamicUnetWide(nn.Module):
             self,
             encoder,
             mid_layers,
-            n_classes: int = 3,
-            blur: bool = True,
-            self_attention: bool = True,
-            y_range: Optional[Tuple[float, float]] = (-3.0, 3.0),  # SigmoidRange
-            last_cross: bool = True,
-            bottle: bool = False,
-            norm_type: str = "NormSpectral",
-            nf_factor: int = 2,
-            shortcut_idxs_in_enc=None,
+            decoder,
+            post_layers,
             **kwargs
     ):
-        if shortcut_idxs_in_enc is None:
-            shortcut_idxs_in_enc = [2, 4, 5, 6]
-        encoder = build_backbone(encoder)
-        mid_layers = build_component(mid_layers)
-
-        extra_bn = norm_type == "NormSpectral"
-
-        # ni = 2048
-        enc_out_channels = encoder.get_channels()
-        ni = enc_out_channels[-1]
-        kwargs_0 = {}  # 自己加的
-
-        layers_enc = [encoder]
-        layers_mid = [mid_layers]
-        layers_dec = []
-        layers_post = []
-
-        shortcut_idxs_in_enc.reverse()
-        x_in_c_list = [enc_out_channels[i] for i in shortcut_idxs_in_enc]
-
-        # up_in_c_list = [2048, 512, 512, 512]
-        # up_in_c = 2048
-        up_in_c = ni
-        nums_shortcut = len(shortcut_idxs_in_enc)
-        for i in range(nums_shortcut):
-            not_final = i != nums_shortcut - 1
-            # up_in_c = up_in_c_list[i]
-            x_in_c = x_in_c_list[i]
-            sa = self_attention and (i == nums_shortcut - 3)
-
-            # 这个512是原代码自带的
-            nf = 512 * nf_factor
-            n_out = nf if not_final else nf // 2
-
-            unet_block = UnetBlockWide(
-                up_in_c,
-                x_in_c,
-                n_out,
-                final_div=not_final,
-                blur=blur,
-                self_attention=sa,
-                norm_type=norm_type,
-                extra_bn=extra_bn,
-                **kwargs_0
-            ).eval()
-            up_in_c = n_out // 2
-            layers_dec.append(unet_block)
-
-        # ni = 256
-        ni = up_in_c
-        layers_post.append(PixelShuffle_ICNR(ni, norm_type="NormWeight", **kwargs_0))
-        if last_cross:
-            layers_post.append(MergeLayer(dense=True))
-            ni += n_classes
-            layers_post.append(res_block(ni, bottle=bottle, norm_type=norm_type, **kwargs_0))
-        layers_post += [
-            custom_conv_layer(ni, n_classes, ks=1, use_activ=False, norm_type=norm_type)
-        ]
-        if y_range is not None:
-            layers_post.append(SigmoidRange(*y_range))
-
         super().__init__()
-        self.layers_enc = nn.ModuleList(layers_enc)
-        self.layers_mid = nn.ModuleList(layers_mid)
-        self.layers_dec = nn.ModuleList(layers_dec)
-        self.layers_post = nn.ModuleList(layers_post)
+        self.layers_enc = build_backbone(encoder)
+        self.layers_mid = build_component(mid_layers)
+        self.layers_dec = build_component(decoder)
+        self.layers_post = build_component(post_layers)
 
     def forward(self, x):
         res = x
 
-        [x1, x2, x3, x4, res] = self.layers_enc[0](res)
+        res, short_cut_out = self.layers_enc(res)
 
-        for layer in self.layers_mid:
-            res = layer(res)
+        res = self.layers_mid(res)
 
-        for layer, s in zip(self.layers_dec, [x4, x3, x2, x1]):
-            res = layer(res, s)
+        short_cut_out.reverse()
+        res = self.layers_dec(res, short_cut_out)
 
-        res = self.layers_post[0](res)
-        res = torch.cat([res, x], dim=1)
-        for idx, layer in enumerate(self.layers_post[2:]):
-            res = layer(res)
+        res = self.layers_post(res, x)
 
         return res
 

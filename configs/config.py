@@ -26,7 +26,7 @@ model = dict(
         upsample_type='CustomPixelShuffle_ICNR',
         nf_factor=1.5,
         norm_type="NormSpectral",
-        up_in_c_list = [2048, 512, 512, 512],
+        up_in_c_list=[2048, 512, 512, 512],
         layer_with_self_attention = [],
         blur=True,
     ),

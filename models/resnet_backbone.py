@@ -5,7 +5,7 @@ from mmedit.models.registry import BACKBONES
 
 @BACKBONES.register_module()
 class ColorizationResNet(ResNet):
-    def __init__(self, num_layers, pretrained=None):
+    def __init__(self, num_layers, pretrained=None, out_layers=[2, 4, 5, 6]):
 
         if num_layers == 101:
             super().__init__(block=Bottleneck, layers=[3, 4, 23, 3], num_classes=1, zero_init_residual=True)
@@ -17,28 +17,17 @@ class ColorizationResNet(ResNet):
         del self.avgpool
         del self.fc
 
+        self.out_layers = out_layers
+
     def forward(self, x):
-        outs = []
-        x = self.conv1(x)
-        x = self.bn1(x)
-        outs.append(x)
-
-        x = self.relu(x)
-        x = self.maxpool(x)
-
-        x = self.layer1(x)
-        outs.append(x)
-
-        x = self.layer2(x)
-        outs.append(x)
-
-        x = self.layer3(x)
-        outs.append(x)
-
-        x = self.layer4(x)
-        outs.append(x)
-
-        return outs
+        layers = [self.conv1, self.bn1, self.relu,
+                  self.layer1, self.layer2, self.layer3, self.layer4]
+        shortcut_out = []
+        for layer_idx, layer in enumerate(layers):
+            if layer_idx in self.out_layers:
+                shortcut_out.append(x)
+            x = layer(x)
+        return x, shortcut_out
 
     def get_channels(self):
         x = torch.rand([1, 3, 64, 64])
