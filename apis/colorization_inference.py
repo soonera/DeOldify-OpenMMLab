@@ -62,35 +62,15 @@ def init_colorization_model(config, checkpoint=None, device='cuda:0'):
     return model
 
 
-def pil2tensor(image, dtype):
-    "Convert PIL style `image` array to torch style image tensor."
-    a = np.asarray(image)
-    if a.ndim == 2: a = np.expand_dims(a, 2)
-    a = np.transpose(a, (1, 0, 2))
-    a = np.transpose(a, (2, 1, 0))
-    return torch.from_numpy(a.astype(dtype, copy=False) )
-
-
-def norm(x, mean, std):
-    x = (x - mean[..., None, None]) / std[..., None, None]
-    return x
-
-
 def denorm(x, mean, std):
     x = x * std[..., None, None] + mean[..., None, None]
     return x
 
 
 def post_process(raw_color, orig):
-    color_np = np.asarray(raw_color)
-    orig_np = np.asarray(orig)
-    color_yuv = cv2.cvtColor(color_np, cv2.COLOR_BGR2YUV)
-    # do a black and white transform first to get better luminance values
-    orig_yuv = cv2.cvtColor(orig_np, cv2.COLOR_BGR2YUV)
-    hires = np.copy(orig_yuv)
-    hires[:, :, 1:3] = color_yuv[:, :, 1:3]
-    final = cv2.cvtColor(hires, cv2.COLOR_YUV2BGR)
-    final = Image.fromarray(final)
+    color_y, color_u, color_v = raw_color.convert("YCbCr").split()
+    orig_y, orig_u, orig_v = orig.convert("YCbCr").split()
+    final = Image.merge("YCbCr", (orig_y, color_u, color_v)).convert("RGB")
     return final
 
 
@@ -105,26 +85,6 @@ def colorization_inference(model, img_path):
         np.ndarray: The predicted colorization result.
     """
 
-    torch.cuda.empty_cache()
-
-    orig_image = PIL.Image.open(img_path).convert('RGB')
-    # render_factor = 10
-    # render_base = 16
-    # render_sz = render_factor * render_base
-    # targ_sz = (render_sz, render_sz)
-    # model_image = orig_image.resize(targ_sz, resample=PIL.Image.BILINEAR).convert('LA').convert('RGB')
-    # x = pil2tensor(model_image, np.float32)
-    # x = x.cuda()
-
-    # x.div_(255)
-    #
-    # # imagenet的均值和方差
-    mean = torch.tensor([0.4850, 0.4560, 0.4060]).cuda()
-    std = torch.tensor([0.2290, 0.2240, 0.2250]).cuda()
-    #
-    # x_ = norm(x, mean, std)
-
-    # build the data pipeline
     cfg = model.cfg
     device = next(model.parameters()).device  # model device
     test_pipeline = Compose(cfg.test_pipeline)
@@ -135,14 +95,24 @@ def colorization_inference(model, img_path):
 
     model.eval()
     with torch.no_grad():
-        # results = model.forward(x_.unsqueeze(0).cuda()).squeeze().cpu()
-        results = model.forward(data['gt_img']).squeeze().cpu()
+        results = model.forward(data['gt_img']).squeeze()
 
-    results = denorm(results.detach().cpu(), mean.cpu(), std.cpu())
+    # denom
+    mean = torch.tensor([0.4850, 0.4560, 0.4060]).cuda()  # imagenet的均值和方差
+    std = torch.tensor([0.2290, 0.2240, 0.2250]).cuda()
+    results = denorm(results.detach(), mean, std)
+
+    # clamp
     results = results.float().clamp(min=0, max=1)
-    out = (results.numpy()*255).astype('uint8').transpose(1, 2, 0)
+
+    # To PIL
+    out = (results.cpu().numpy()*255).astype('uint8').transpose(1, 2, 0)
     out = Image.fromarray(out)
+
+    # Resize
+    orig_image = PIL.Image.open(img_path).convert('RGB')
     raw_color = out.resize(orig_image.size, resample=PIL.Image.BILINEAR)
+
     final = post_process(raw_color, orig_image)
 
     return final
