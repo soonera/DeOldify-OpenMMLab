@@ -27,13 +27,13 @@ def main():
     model = init_colorization_model(
         args.config, args.checkpoint, device=torch.device('cuda', args.device))
 
-    img_paths = sorted(glob(join(args.work_dir, "sources/*.*")))
+    img_paths = sorted(glob(join(args.work_dir, "source/*.*")))
     for img_path in img_paths:
 
         output = colorization_inference(model, img_path)
 
         file_name = img_path.split('/')[-1].split('.')[0]
-        output.save(join(args.work_dir, "results", file_name + '.png'))
+        output.save(join(args.work_dir, "result", file_name + '.png'))
         print(file_name)
 
 
