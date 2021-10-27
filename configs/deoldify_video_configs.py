@@ -46,25 +46,16 @@ dataset_type = ''
 train_pipeline = []
 test_pipeline = [
     dict(
-        type='LoadImageFromFile',
-        key='gt_img',
-        flag='grayscale',
-        backend='pillow'
-    ),
-    dict(
         type='Resize',
         keys=['gt_img'],
         scale=(160, 160),
         keep_ratio=False,
-        backend='pillow'
+        # backend='pillow'
+        backend='cv2'
     ),
     dict(
         type='RescaleToZeroOne',
         keys=['gt_img']
-    ),
-    dict(
-        type='ChannelsFromOneToThree',
-        keys=['gt_img'],
     ),
     dict(
         type='Normalize',
@@ -75,9 +66,10 @@ test_pipeline = [
     dict(
         type='Collect',
         keys=['gt_img'],
-        meta_keys=['gt_img_path']),
-    dict(type='ImageToTensor',
-         keys=['gt_img']),
+        meta_keys=['gt_img']),
+    dict(
+        type='ImageToTensor',
+        keys=['gt_img']),
 ]
 
 

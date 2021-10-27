@@ -52,12 +52,15 @@ test_pipeline = [
     dict(
         type='Resize',
         keys=['gt_img'],
-        # scale=(35 * 16, 35 * 16),
-        scale=(25 * 16, 25 * 16),
+        scale=(35 * 16, 35 * 16),
+        # scale=(25 * 16, 25 * 16),
         keep_ratio=False,
         backend='pillow'
     ),
-    dict(type='RescaleToZeroOne', keys=['gt_img']),
+    dict(
+        type='RescaleToZeroOne',
+        keys=['gt_img']
+    ),
     dict(
         type='ChannelsFromOneToThree',
         keys=['gt_img'],
