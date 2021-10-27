@@ -4,5 +4,7 @@ setup(
     name="deoldify-mmcv",
     version="1.0",
     author="renqin",
-    packages=find_packages()
+    packages=find_packages(),
+    install_requires=[],
+    zip_safe=False
 )

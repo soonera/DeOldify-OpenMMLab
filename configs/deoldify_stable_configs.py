@@ -1,13 +1,6 @@
-import sys
-sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/models')
-sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/apis')
-sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
-
-
-custom_imports = dict(
-    imports=['deoldify', 'resnet_backbone', 'mid_layers',
-             'decoder_layers', 'post_layers', 'channels_from_one_to_three'],
-    allow_failed_imports=False)
+from models import *
+from datasets import *
+from apis import *
 
 model = dict(
     type='DeOldify',
@@ -17,7 +10,6 @@ model = dict(
         pretrained=None,
         out_layers=[2, 5, 6, 7]),
     mid_layers=dict(
-        # channel_factors=[2, 1],
         type='MidConvLayer',
         norm_type="NormSpectral",
         ni=2048),
