@@ -35,12 +35,12 @@ def init_colorization_model(config, checkpoint=None, device='cuda:0'):
         # checkpoint = load_checkpoint(model, checkpoint)
         params = torch.load(checkpoint, map_location='cpu')
 
-        # 自己加的
+        # ------------model keys transform------------------
         keys_0 = model.state_dict().keys()
         # torch.save({'model': model.state_dict()}, 'keys.pth')
 
         keys_1 = params['model'].keys()
-        print(keys_0 == keys_1)
+        # print(keys_0 == keys_1)
 
         if keys_0 != keys_1 and len(keys_0) == len(keys_1):
             d = params['model'].items()
@@ -50,6 +50,7 @@ def init_colorization_model(config, checkpoint=None, device='cuda:0'):
             for (k, v), (k1, v1) in zip(d, d1):
                 new_d[k1] = v
             params['model'] = new_d
+        # ------------------------------
 
         model.load_state_dict(params['model'])
 

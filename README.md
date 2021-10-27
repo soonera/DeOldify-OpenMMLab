@@ -19,12 +19,12 @@ Examples:
 ```shell
 python demo/image_demo.py work_dirs/example_exp_stable/source/1.jpg configs/deoldify_stable_configs.py checkpoints/ColorizeStable_gen.pth --out work_dirs/example_exp_stable/result/1.png --show
 ```
-
-The predicted inpainting result will be save in `work_dirs/example_exp_video/result/1.png`.
+The predicted inpainting result will be save in `work_dirs/example_exp_stable/result/1.png`.
 
 ```shell
-python demo/image_demo.py work_dirs/example_exp_artistic/source/1.jpg configs/deoldify_artistic_configs.py checkpoints/ColorizeStable_gen.pth --out work_dirs/example_exp_artistic/result/1.png --show
+python demo/image_demo.py work_dirs/example_exp_artistic/source/1.jpg configs/deoldify_artistic_configs.py checkpoints/ColorizeArtistic_gen.pth --out work_dirs/example_exp_artistic/result/1.png --show
 ```
+The predicted inpainting result will be save in `work_dirs/example_exp_artistic/result/1.png`.
 
 
 ### Video demo
