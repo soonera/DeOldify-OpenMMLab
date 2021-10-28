@@ -10,7 +10,6 @@ model = dict(
         pretrained=None,
         out_layers=[2, 5, 6, 7]),
     mid_layers=dict(
-        # channel_factors=[2, 1],
         type='MidConvLayer',
         norm_type="NormSpectral",
         ni=2048),
@@ -65,4 +64,7 @@ test_pipeline = [
         keys=['gt_img']),
 ]
 
-
+data = dict(
+    train=dict(pipeline=train_pipeline),
+    val=dict(pipeline=test_pipeline),
+    test=dict(pipeline=test_pipeline))

@@ -54,10 +54,6 @@ test_pipeline = [
         type='RescaleToZeroOne',
         keys=['gt_img']
     ),
-    # dict(
-    #     type='ChannelsFromOneToThree',
-    #     keys=['gt_img'],
-    # ),
     dict(
         type='Normalize',
         keys=['gt_img'],
@@ -72,4 +68,7 @@ test_pipeline = [
          keys=['gt_img']),
 ]
 
-
+data = dict(
+    train=dict(pipeline=train_pipeline),
+    val=dict(pipeline=test_pipeline),
+    test=dict(pipeline=test_pipeline))

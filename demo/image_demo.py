@@ -1,5 +1,4 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import asyncio
 
 from argparse import ArgumentParser
 from apis import (colorization_inference, init_colorization_model)
