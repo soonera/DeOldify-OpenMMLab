@@ -1,18 +1,6 @@
-# import sys
-# sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/models')
-# sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/apis')
-# sys.path.append('/home/SENSETIME/renqin/PycharmProjects/DeOldify-demo/datasets')
-#
-#
-# custom_imports = dict(
-#     imports=['deoldify', 'resnet_backbone', 'mid_layers',
-#              'decoder_layers', 'post_layers', 'channels_from_one_to_three'],
-#     allow_failed_imports=False)
-# import models
-
-from models import *
-from datasets import *
-from apis import *
+custom_imports = dict(
+    imports=['models', 'apis'],
+    allow_failed_imports=False)
 
 model = dict(
     type='DeOldify',
@@ -52,7 +40,7 @@ test_pipeline = [
     dict(
         type='LoadImageFromFile',
         key='gt_img',
-        flag='grayscale',
+        # flag='grayscale',
         backend='pillow'
     ),
     dict(
@@ -67,10 +55,10 @@ test_pipeline = [
         type='RescaleToZeroOne',
         keys=['gt_img']
     ),
-    dict(
-        type='ChannelsFromOneToThree',
-        keys=['gt_img'],
-    ),
+    # dict(
+    #     type='ChannelsFromOneToThree',
+    #     keys=['gt_img'],
+    # ),
     dict(
         type='Normalize',
         keys=['gt_img'],

@@ -1,6 +1,6 @@
-from models import *
-from datasets import *
-from apis import *
+custom_imports = dict(
+    imports=['models', 'apis'],
+    allow_failed_imports=False)
 
 model = dict(
     type='DeOldify',
@@ -40,7 +40,7 @@ test_pipeline = [
     dict(
         type='LoadImageFromFile',
         key='gt_img',
-        flag='grayscale',
+        # flag='grayscale',
         backend='pillow'
     ),
     dict(
@@ -54,10 +54,10 @@ test_pipeline = [
         type='RescaleToZeroOne',
         keys=['gt_img']
     ),
-    dict(
-        type='ChannelsFromOneToThree',
-        keys=['gt_img'],
-    ),
+    # dict(
+    #     type='ChannelsFromOneToThree',
+    #     keys=['gt_img'],
+    # ),
     dict(
         type='Normalize',
         keys=['gt_img'],

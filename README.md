@@ -42,10 +42,15 @@ python demo/image_demo.py \
 Examples:
 
 ```shell
-python demo/video_demo.py work_dirs/example_exp_video/source/test.mp4 configs/deoldify_video_configs.py checkpoints/ColorizeVideo_gen.pth --out work_dirs/example_exp_video/result/test.mp4 --show
+python demo/video_demo.py \
+    work_dirs/example_exp_video/source/test.mp4 \
+    configs/deoldify_video_configs.py \
+    checkpoints/ColorizeVideo_gen.pth \
+    --out work_dirs/example_exp_video/result/test.mp4 \
+    --show
 ```
 
-The predicted inpainting result will be save in `work_dirs/example_exp_video/result/test.mp4`.
+The predicted colorization result will be saved in `work_dirs/example_exp_video/result/test.mp4`.
 
 
 
