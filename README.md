@@ -1,11 +1,11 @@
-# DeOldifyPredictor-mmcv
+# DeOldifyPredictor
 
 
 ## Introduction
 
-This repo provides DeOldify model for image colorization using mmcv.
+This repo provides DeOldify model for image/video colorization using [mmcv](https://github.com/open-mmlab/mmcv) and [mmediting](https://github.com/open-mmlab/mmediting).
 
-About more details, please refer to https://github.com/jantic/DeOldify
+About more details of DeOldify, please refer to https://github.com/jantic/DeOldify
 
 ## Examples
 
