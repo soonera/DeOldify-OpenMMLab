@@ -104,10 +104,10 @@ The predicted video colorization result will be saved in `work_dirs/video/result
 If you find this project useful in your research, please consider cite:
 
 ```bibtex
-@misc{DeOldify-mmcv,
-    title={DeOldify Implement using mmcv},
-    author={DeOldify-mmcv Contributors},
-    howpublished = {\url{https://github.com/soonera/DeOldify-mmcv}},
+@misc{DeOldify-OpenMMLab,
+    title={DeOldify Implement using OpenMMLab},
+    author={DeOldify-OpenMMLab Contributors},
+    howpublished = {\url{https://github.com/soonera/DeOldify-OpenMMLab}},
     year={2021}
 }
 ```
