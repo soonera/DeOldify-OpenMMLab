@@ -9,6 +9,8 @@ This repo provides DeOldify model for image/video colorization using [mmcv](http
 ### Major features of this repo
 - **Modular design**: We decompose the deoldify framework into different components and one can easily construct a customized editor framework by combining different modules.
 
+![](https://i.imgur.com/OgUBgq5.jpg)
+
 ## Examples
 
 Orignal Image              |  Stable Colorization Image         |  Artistic Colorization Image
