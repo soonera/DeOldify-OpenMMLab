@@ -1,4 +1,4 @@
-# DeOldify-mmcv
+# DeOldifyPredictor-mmcv
 
 
 ## Introduction
@@ -33,6 +33,9 @@ These weights are from https://github.com/jantic/DeOldify
 - [Stable](https://www.dropbox.com/s/usf7uifrctqw9rl/ColorizeStable_gen.pth?dl=0)
 - [Video](https://data.deepai.org/deoldify/ColorizeVideo_gen.pth)
 
+The weight keys will be automatically transformed  in this [file](https://github.com/soonera/DeOldify-mmcv/blob/master/apis/colorization_inference.py). You should only put these three weight files in ./checkpoints
+
+
 
 ### Image demo
 This script performs inference on a single image.
@@ -48,6 +51,7 @@ python demo/image_demo.py \
 
 Examples:
 
+- If you want to use stable mode:
 ```shell
 python demo/image_demo.py \
     work_dirs/stable/source/1.jpg \
@@ -56,8 +60,9 @@ python demo/image_demo.py \
     --out work_dirs/stable/result/1.png \
     --show
 ```
-The predicted colorization result will be save in `work_dirs/stable/result/1.png`.
+The predicted stable colorization result will be save in `work_dirs/stable/result/1.png`.
 
+- If you want to use artistic mode:
 ```shell
 python demo/image_demo.py \
     work_dirs/artistic/source/1.jpg \
@@ -66,7 +71,7 @@ python demo/image_demo.py \
     --out work_dirs/artistic/result/1.png \
     --show
 ```
-The predicted colorization result will be save in `work_dirs/artistic/result/1.png`.
+The predicted artistic colorization result will be save in `work_dirs/artistic/result/1.png`.
 
 
 ### Video demo
@@ -82,7 +87,7 @@ python demo/image_demo.py \
 ```
 
 Examples:
-
+- You can only use video mode:
 ```shell
 python demo/video_demo.py \
     work_dirs/video/source/test.mp4 \
@@ -92,7 +97,7 @@ python demo/video_demo.py \
     --show
 ```
 
-The predicted colorization result will be saved in `work_dirs/video/result/test.mp4`.
+The predicted video colorization result will be saved in `work_dirs/video/result/test.mp4`.
 
 ## Citation
 
