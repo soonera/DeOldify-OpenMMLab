@@ -4,15 +4,10 @@
 ## Introduction
 English | [简体中文](/README_zh-CN.md)
 
-This repo provides DeOldify model for image/video colorization using [mmcv](https://github.com/open-mmlab/mmcv) and [mmediting](https://github.com/open-mmlab/mmediting).
+This repo provides DeOldify model for image/video colorization using [mmcv](https://github.com/open-mmlab/mmcv) and [mmediting](https://github.com/open-mmlab/mmediting). About more details of DeOldify, please refer to https://github.com/jantic/DeOldify
 
-About more details of DeOldify, please refer to https://github.com/jantic/DeOldify
-
-### Major features
-- **Modular design**
-
-  We decompose the deoldify framework into different components and one can easily construct a customized editor framework by combining different modules.
-
+### Major features of this repo
+- **Modular design**: We decompose the deoldify framework into different components and one can easily construct a customized editor framework by combining different modules.
 
 ## Examples
 
@@ -40,7 +35,7 @@ These weights are from https://github.com/jantic/DeOldify
 - [Stable](https://www.dropbox.com/s/usf7uifrctqw9rl/ColorizeStable_gen.pth?dl=0)
 - [Video](https://data.deepai.org/deoldify/ColorizeVideo_gen.pth)
 
-The weight keys will be automatically transformed  in this [file](https://github.com/soonera/DeOldify-mmcv/blob/master/apis/colorization_inference.py). You should only put these three weight files in ./checkpoints
+The weight keys will be automatically transformed  in this [file](./apis/colorization_inference.py). You should only put these three weight files in ./checkpoints
 
 
 
