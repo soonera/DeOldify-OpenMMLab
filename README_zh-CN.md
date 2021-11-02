@@ -25,20 +25,18 @@
 ## 许可证
 本项目开源自[MIT license](LICENSE)
 
-## Get Started
+## 开始使用
 
-### Completed Generator Weights
-These weights are from https://github.com/jantic/DeOldify
+### 训练完成的模型
+这些权重来自原作者https://github.com/jantic/DeOldify
 - [Artistic](https://data.deepai.org/deoldify/ColorizeArtistic_gen.pth)
 - [Stable](https://www.dropbox.com/s/usf7uifrctqw9rl/ColorizeStable_gen.pth?dl=0)
 - [Video](https://data.deepai.org/deoldify/ColorizeVideo_gen.pth)
 
-The weight keys will be automatically transformed  in this [file](https://github.com/soonera/DeOldify-mmcv/blob/master/apis/colorization_inference.py). You should only put these three weight files in ./checkpoints
+权重的键名会在[本代码](https://github.com/soonera/DeOldify-mmcv/blob/master/apis/colorization_inference.py) 中自动被转换。您只需要把这三个下载好的权重文件放在./checkpoints目录下
 
-
-
-### Image demo
-This script performs inference on a single image.
+### 图片上色
+对单张图片进行上色，命令行模板如下：
 ```shell
 python demo/image_demo.py \
     ${IMAGE_FILE} \
@@ -49,9 +47,9 @@ python demo/image_demo.py \
     [--show ${SHOW}]
 ```
 
-Examples:
+例子:
 
-- If you want to use stable mode:
+- 如果使用stable模式:
 ```shell
 python demo/image_demo.py \
     work_dirs/stable/source/1.jpg \
@@ -60,9 +58,9 @@ python demo/image_demo.py \
     --out work_dirs/stable/result/1.png \
     --show
 ```
-The predicted stable colorization result will be save in `work_dirs/stable/result/1.png`.
+预测出的stable模式上色结果将会保存为`work_dirs/stable/result/1.png`.
 
-- If you want to use artistic mode:
+- 如果使用artistic模式:
 ```shell
 python demo/image_demo.py \
     work_dirs/artistic/source/1.jpg \
@@ -71,11 +69,11 @@ python demo/image_demo.py \
     --out work_dirs/artistic/result/1.png \
     --show
 ```
-The predicted artistic colorization result will be save in `work_dirs/artistic/result/1.png`.
+预测出的artistic模式上色结果将会保存为`work_dirs/artistic/result/1.png`.
 
 
-### Video demo
-This script performs inference on a single video.
+### 视频上色
+对单个视频进行上色，命令行模板如下：
 ```shell
 python demo/image_demo.py \
     ${IMAGE_FILE} \
@@ -86,8 +84,8 @@ python demo/image_demo.py \
     [--show ${SHOW}]
 ```
 
-Examples:
-- You can only use video mode:
+例子:
+- 只能使用video模式:
 ```shell
 python demo/video_demo.py \
     work_dirs/video/source/test.mp4 \
@@ -96,10 +94,9 @@ python demo/video_demo.py \
     --out work_dirs/video/result/test.mp4 \
     --show
 ```
+预测出的video模式上色结果将会保存为`work_dirs/video/result/test.mp4`.
 
-The predicted video colorization result will be saved in `work_dirs/video/result/test.mp4`.
-
-## Citation
+## 引用
 
 如果您觉得 DeOldiy-OpenMMLab 对您的研究有所帮助，请考虑引用它：
 
