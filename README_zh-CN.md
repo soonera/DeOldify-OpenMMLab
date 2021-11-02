@@ -2,35 +2,28 @@
 
 
 ## Introduction
-English | [简体中文](/README_zh-CN.md)
+[English](/README.md) | 简体中文
 
-This repo provides DeOldify model for image/video colorization using [mmcv](https://github.com/open-mmlab/mmcv) and [mmediting](https://github.com/open-mmlab/mmediting).
+本项目基于[mmcv](https://github.com/open-mmlab/mmcv) and [mmediting](https://github.com/open-mmlab/mmediting) 实现了DeOldiy的推理部分，可用于图片和视频的上色。
+更多关于DeOldify的介绍，可参考原作者的github: https://github.com/jantic/DeOldify。
 
-About more details of DeOldify, please refer to https://github.com/jantic/DeOldify
-
-### Major features
-- **Modular design**
-
-  We decompose the deoldify framework into different components and one can easily construct a customized editor framework by combining different modules.
-
+### 本实现的主要特点
+- **模块化设计**： 我们将deoldify框架分解为不同的组件，并且可以通过组合不同的模块轻松地构建自定义的编辑器模型。
 
 ## Examples
 
-Orignal Image              |  Stable Colorization Image         |  Artistic Colorization Image
+原黑白图              |  稳定模式上色图         |  艺术模式上色图
 :-------------------------:|:-------------------------:         |:-------------------------:
 ![](https://i.imgur.com/lpiGyel.jpg)  |  ![](https://i.imgur.com/Y1pqmTT.png) | ![Artistic](https://i.imgur.com/TaBEP3B.png)
 
 
 ## Installation
 
-Please refer to [https://github.com/open-mmlab/mmediting/blob/master/docs/install.md](docs/install.md) for installation.
+相比于原作者使用fastai， 本项目使用了OpenMMLab中的MMEditing，所需安装包与MMEditing一致，可参考[https://github.com/open-mmlab/mmediting/blob/master/docs/install.md](docs/install.md)。
 
 
-## License
-
-All code in this repository is under the [MIT license](LICENSE).
-
-
+## 许可证
+本项目开源自[MIT license](LICENSE)
 
 ## Get Started
 
@@ -108,7 +101,7 @@ The predicted video colorization result will be saved in `work_dirs/video/result
 
 ## Citation
 
-If you find this project useful in your research, please consider cite:
+如果您觉得 DeOldiy-OpenMMLab 对您的研究有所帮助，请考虑引用它：
 
 ```bibtex
 @misc{DeOldify-OpenMMLab,
