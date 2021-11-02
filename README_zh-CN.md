@@ -1,7 +1,7 @@
 # DeOldifyPredictor
 
 
-## Introduction
+## 介绍
 [English](/README.md) | 简体中文
 
 本项目基于[mmcv](https://github.com/open-mmlab/mmcv) and [mmediting](https://github.com/open-mmlab/mmediting) 实现了DeOldiy的推理部分，可用于图片和视频的上色。
@@ -10,14 +10,14 @@
 ### 本实现的主要特点
 - **模块化设计**： 我们将deoldify框架分解为不同的组件，并且可以通过组合不同的模块轻松地构建自定义的编辑器模型。
 
-## Examples
+## 效果展示
 
 原黑白图              |  稳定模式上色图         |  艺术模式上色图
 :-------------------------:|:-------------------------:         |:-------------------------:
 ![](https://i.imgur.com/lpiGyel.jpg)  |  ![](https://i.imgur.com/Y1pqmTT.png) | ![Artistic](https://i.imgur.com/TaBEP3B.png)
 
 
-## Installation
+## 安装
 
 相比于原作者使用fastai， 本项目使用了OpenMMLab中的MMEditing，所需安装包与MMEditing一致，可参考[https://github.com/open-mmlab/mmediting/blob/master/docs/install.md](docs/install.md)。
 
