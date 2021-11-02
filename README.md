@@ -18,7 +18,7 @@ Orignal Image              |  Stable Colorization Image         |  Artistic Colo
 
 ## Installation
 
-Please refer to [https://github.com/open-mmlab/mmediting/blob/master/docs/install.md](docs/install.md) for installation.
+Please refer to https://github.com/open-mmlab/mmediting/blob/master/docs/install.md for installation.
 
 
 ## License
