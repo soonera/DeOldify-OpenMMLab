@@ -7,9 +7,7 @@ This repo provides DeOldify model for image colorization using mmcv.
 
 About more details, please refer to https://github.com/jantic/DeOldify
 
-## Example Images
-
-
+## Examples
 
 Orignal Image              |  Stable Colorization Image         |  Artistic Colorization Image
 :-------------------------:|:-------------------------:         |:-------------------------:
