@@ -10,7 +10,7 @@
 ### 本实现的主要特点
 - **模块化设计**： 我们将deoldify框架分解为不同的组件，并且可以通过组合不同的模块轻松地构建自定义的编辑器模型。
 
-![](https://i.imgur.com/OgUBgq5.jpg)
+![](https://i.imgur.com/58BVejq.png)
 
 ## 效果展示
 
