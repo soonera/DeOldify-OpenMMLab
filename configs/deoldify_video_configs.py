@@ -4,38 +4,37 @@ custom_imports = dict(
 
 model = dict(
     type='DeOldify',
-    encoder=dict(
-        type='ColorizationResNet',
-        num_layers=101,
-        pretrained=None,
-        out_layers=[2, 5, 6, 7]),
-    mid_layers=dict(
-        type='MidConvLayer',
-        norm_type="NormSpectral",
-        ni=2048),
-    decoder=dict(
-        type='UnetWideDecoder',
-        self_attention=True,
-        x_in_c_list=[64, 256, 512, 1024],
-        ni=2048,
-        nf_factor=2,
-        norm_type="NormSpectral",),
-    post_layers=dict(
-        type='PostLayer',
-        ni=256,
-        last_cross=True,
-        n_classes=3,
-        bottle=False,
-        norm_type="NormSpectral",
-        y_range=(-3.0, 3.0)),
+    backbone=dict(
+        type='DeOldify',
+        encoder=dict(
+            type='ColorizationResNet',
+            num_layers=101,
+            pretrained=None,
+            out_layers=[2, 5, 6, 7]),
+        mid_layers=dict(
+            type='MidConvLayer',
+            norm_type="NormSpectral",
+            ni=2048),
+        decoder=dict(
+            type='UnetWideDecoder',
+            self_attention=True,
+            x_in_c_list=[64, 256, 512, 1024],
+            ni=2048,
+            nf_factor=2,
+            norm_type="NormSpectral"),
+        post_layers=dict(
+            type='PostLayer',
+            ni=256,
+            last_cross=True,
+            n_classes=3,
+            bottle=False,
+            norm_type="NormSpectral",
+            y_range=(-3.0, 3.0)),
     )
+    loss=None,
+    pretrain='',
+)
 
-train_cfg = dict()
-test_cfg = dict()
-
-dataset_type = ''
-
-train_pipeline = []
 test_pipeline = [
     dict(
         type='Resize',
@@ -63,8 +62,3 @@ test_pipeline = [
         type='ImageToTensor',
         keys=['gt_img']),
 ]
-
-data = dict(
-    train=dict(pipeline=train_pipeline),
-    val=dict(pipeline=test_pipeline),
-    test=dict(pipeline=test_pipeline))
