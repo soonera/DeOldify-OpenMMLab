@@ -1,3 +1,5 @@
+# modified from fastai
+
 from typing import Callable
 from torch import nn
 from torch.nn.utils.weight_norm import weight_norm
