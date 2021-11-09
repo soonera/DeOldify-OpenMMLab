@@ -183,3 +183,13 @@ def conv1d(ni: int, no: int, ks: int = 1, stride: int = 1, padding: int = 0, bia
     nn.init.kaiming_normal_(conv.weight)
     if bias: conv.bias.data.zero_()
     return spectral_norm(conv)
+
+
+class Flatten(nn.Module):
+    "Flatten `x` to a single dimension, often used at the end of a model. `full` for rank-1 tensor"
+    def __init__(self, full:bool=False):
+        super().__init__()
+        self.full = full
+
+    def forward(self, x):
+        return x.view(-1) if self.full else x.view(x.size(0), -1)

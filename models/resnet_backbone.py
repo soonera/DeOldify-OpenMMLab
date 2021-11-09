@@ -1,9 +1,10 @@
 import torch
 from torchvision.models.resnet import BasicBlock, Bottleneck, ResNet
-from mmedit.models.registry import BACKBONES
+from mmedit.models.registry import COMPONENTS
 
 
-@BACKBONES.register_module()
+# @BACKBONES.register_module()
+@COMPONENTS.register_module()
 class ColorizationResNet(ResNet):
     def __init__(self, num_layers, pretrained=None, out_layers=[2, 5, 6, 7]):
 
