@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import numbers
 import os.path as osp
 
 import mmcv
@@ -37,6 +38,7 @@ class DeOldify(BaseModel):
             `show_input`: whether to show input real images.
         pretrained (str): Path for pretrained model. Default: None.
     """
+
     def __init__(self,
                  generator,
                  discriminator,
@@ -58,17 +60,15 @@ class DeOldify(BaseModel):
         # losses
         assert gan_loss is not None  # gan loss cannot be None
         self.gan_loss = build_loss(gan_loss)
-        self.perceptual_loss = build_loss(perceptual_loss) if perceptual_loss else None
+        self.perceptual_loss = build_loss(
+            perceptual_loss) if perceptual_loss else None
 
-        self.disc_steps = 1 if self.train_cfg is None else self.train_cfg.get(
-            'disc_steps', 1)
-        self.disc_init_steps = (0 if self.train_cfg is None else
-                                self.train_cfg.get('disc_init_steps', 0))
+        self.disc_steps = 1 if self.train_cfg is None else self.train_cfg.get('disc_steps', 1)
+        self.disc_init_steps = (0 if self.train_cfg is None else self.train_cfg.get('disc_init_steps', 0))
 
         self.step_counter = 0  # counting training steps
 
-        self.show_input = (False if self.test_cfg is None else
-                           self.test_cfg.get('show_input', False))
+        self.show_input = (False if self.test_cfg is None else self.test_cfg.get('show_input', False))
 
         # support fp16
         self.fp16_enabled = False
@@ -81,34 +81,49 @@ class DeOldify(BaseModel):
             pretrained (str, optional): Path for pretrained weights. If given
                 None, pretrained weights will not be loaded. Default: None.
         """
-        self.generator.init_weights(pretrained=pretrained)
-        self.discriminator.init_weights(pretrained=pretrained)
+        # self.generator.init_weights(pretrained=pretrained)
+        # self.discriminator.init_weights(pretrained=pretrained)
+        pass
 
-    def setup(self, img_grey, img_color, meta):
+    # def setup(self, img_gray, img_color, meta):
+    #     """Perform necessary pre-processing steps.
 
-        """Perform necessary pre-processing steps.
+    #     Args:
+    #         img_gray (Tensor): Input gray image.
+    #         img_color (Tensor): Input color image.
+    #         meta (list[dict]): Input meta data.
+
+    #     Returns:
+    #         Tensor, Tensor, list[str]: The gray/color images, and \
+    #             the image path as the metadata.
+    #     """
+    #     image_gray_real = img_gray
+    #     image_color_real = img_color
+    #     image_path = [v['img_gray_path'] for v in meta]
+
+    #     return image_gray_real, image_color_real, image_path
+
+
+    @auto_fp16(apply_to=('img_gray', ))
+    def forward(self, img_gray, img_color=None, test_mode=False, **kwargs):
+        """Forward function.
 
         Args:
-            img_grey (Tensor): Input grey image.
-            img_color (Tensor): Input color image.
-            meta (list[dict]): Input meta data.
-
-        Returns:
-            Tensor, Tensor, list[str]: The grey/color images, and \
-                the image path as the metadata.
+            img_gray (Tensor): Input gray image.
+            img_color (Tensor): Input color image. Default: None.
+            test_mode (bool): Whether in test mode or not. Default: False.
+            kwargs (dict): Other arguments.
         """
-        image_grey_real = img_grey
-        image_color_real = img_color
-        image_path = [v['img_grey_path'] for v in meta]
+        if test_mode:
+            return self.forward_test(img_gray, img_color, **kwargs)
 
-        return image_grey_real, image_color_real, image_path
+        return self.forward_train(img_gray, img_color)
 
-    @auto_fp16(apply_to=('img_grey', 'img_color'))
-    def forward_train(self, img_grey, img_color, meta):
+    def forward_train(self, img_gray, img_color, meta):
         """Forward function for training.
 
         Args:
-            img_grey (Tensor): Input grey image.
+            img_gray (Tensor): Input gray image.
             img_color (Tensor): Input color image.
             meta (list[dict]): Input meta data.
 
@@ -116,23 +131,25 @@ class DeOldify(BaseModel):
             dict: Dict of forward results for training.
         """
         # necessary setup
-        img_grey_real, img_color_real, _ = self.setup(img_grey, img_color, meta)
-        img_color_fake = self.generator(img_grey_real)
-        results = dict(img_grey_real=img_grey_real, img_color_fake=img_color_fake, img_color_real=img_color_real)
+        img_gray_real, img_color_real, _ = self.setup(
+            img_gray, img_color, meta)
+        img_color_fake = self.generator(img_gray_real)
+        results = dict(img_gray_real=img_gray_real,
+                       img_color_fake=img_color_fake, img_color_real=img_color_real)
         return results
 
     def forward_test(self,
-                     img_grey,
-                     img_color,
-                     meta,
+                     img_gray,
+                     img_color=None,
+                     meta=None,
                      save_image=False,
                      save_path=None,
                      iteration=None):
         """Forward function for testing.
 
         Args:
-            img_grey (Tensor): Input grey image.
-            img_color (Tensor): Input color image.
+            img_gray (Tensor): Input gray image.
+            img_color (Tensor): Input color image. Default: None
             meta (list[dict]): Input meta data.
             save_image (bool, optional): If True, results will be saved as
                 images. Default: False.
@@ -143,43 +160,29 @@ class DeOldify(BaseModel):
         Returns:
             dict: Dict of forward and evaluation results for testing.
         """
-        self.train()
 
-        # necessary setup
-        img_grey_real, img_color_real, image_path = self.setup(img_grey, img_color, meta)
 
-        img_color_fake = self.generator(img_grey_real)
-        results = dict(
-            img_grey=img_grey_real.cpu(), img_color_fake=img_color_fake.cpu(), img_color_real=img_color_real.cpu())
+        img_gray_real, img_color_real = img_gray, img_color
+
+        img_color_fake = self.generator(img_gray_real)
+        
+        results = dict(img_gray=img_gray_real.cpu(), img_color_fake=img_color_fake.cpu())
+        if img_color_real is not None:
+            results['img_color_real'] = img_color_real.cpu()
 
         # save image
         if save_image:
-            assert save_path is not None
-            folder_name = osp.splitext(osp.basename(image_path[0]))[0]
-            if self.show_input:
-                if iteration:
-                    save_path = osp.join(
-                        save_path, folder_name,
-                        f'{folder_name}-{iteration + 1:06d}-rg-fc-rc.png')
-                else:
-                    save_path = osp.join(save_path,
-                                         f'{folder_name}-rg-fc-rc.png')
-                output = np.concatenate([
-                    tensor2img(results['img_grey_real'], min_max=(-1, 1)),
-                    tensor2img(results['img_color_fake'], min_max=(-1, 1)),
-                    tensor2img(results['img_color_real'], min_max=(-1, 1))
-                ],
-                                        axis=1)
+            img_gray_path = meta[0]['img_gray_path']
+            folder_name = osp.splitext(osp.basename(img_gray_path))[0]
+            if isinstance(iteration, numbers.Number):
+                save_path = osp.join(save_path, folder_name,
+                                     f'{folder_name}-{iteration + 1:06d}.png')
+            elif iteration is None:
+                save_path = osp.join(save_path, f'{folder_name}.png')
             else:
-                if iteration:
-                    save_path = osp.join(
-                        save_path, folder_name,
-                        f'{folder_name}-{iteration + 1:06d}-fc.png')
-                else:
-                    save_path = osp.join(save_path, f'{folder_name}-fc.png')
-                output = tensor2img(results['img_color_fake'], min_max=(-1, 1))
-            flag = mmcv.imwrite(output, save_path)
-            results['saved_flag'] = flag
+                raise ValueError('iteration should be number or None, '
+                                 f'but got {type(iteration)}')
+            mmcv.imwrite(tensor2img(img_color_fake), save_path)
 
         return results
 
@@ -195,20 +198,7 @@ class DeOldify(BaseModel):
         out = self.generator(img)
         return out
 
-    def forward(self, img_grey, img_color, meta, test_mode=False, **kwargs):
-        """Forward function.
 
-        Args:
-            img_grey (Tensor): Input grey image.
-            img_color (Tensor): Input color image.
-            meta (list[dict]): Input meta data.
-            test_mode (bool): Whether in test mode or not. Default: False.
-            kwargs (dict): Other arguments.
-        """
-        if test_mode:
-            return self.forward_test(img_grey, img_color, meta, **kwargs)
-
-        return self.forward_train(img_grey, img_color, meta)
 
     def backward_discriminator(self, outputs):
         """Backward function for the discriminator.
@@ -222,12 +212,14 @@ class DeOldify(BaseModel):
         # GAN loss for the discriminator
         losses = dict()
         # conditional GAN
-        fake_ab = torch.cat((outputs['img_grey_real'], outputs['img_color_fake']), 1)
+        fake_ab = torch.cat(
+            (outputs['img_gray_real'], outputs['img_color_fake']), 1)
         fake_pred = self.discriminator(fake_ab.detach())
         losses['loss_gan_d_fake'] = self.gan_loss(
             fake_pred, target_is_real=False, is_disc=True)
 
-        real_ab = torch.cat((outputs['img_grey_real'], outputs['img_color_real']), 1)
+        real_ab = torch.cat(
+            (outputs['img_gray_real'], outputs['img_color_real']), 1)
         real_pred = self.discriminator(real_ab)
         losses['loss_gan_d_real'] = self.gan_loss(
             real_pred, target_is_real=True, is_disc=True)
@@ -248,7 +240,8 @@ class DeOldify(BaseModel):
         """
         losses = dict()
         # GAN loss for the generator
-        fake_ab = torch.cat((outputs['img_grey'], outputs['img_color_fake']), 1)
+        fake_ab = torch.cat(
+            (outputs['img_gray'], outputs['img_color_fake']), 1)
         fake_pred = self.discriminator(fake_ab)
         losses['loss_gan_g'] = self.gan_loss(
             fake_pred, target_is_real=True, is_disc=False)
@@ -274,12 +267,12 @@ class DeOldify(BaseModel):
                 and results for visualization.
         """
         # data
-        img_grey = data_batch['img_grey']
+        img_gray = data_batch['img_gray']
         img_color = data_batch['img_color']
         meta = data_batch['meta']
 
         # forward generator
-        outputs = self.forward(img_grey, img_color, meta, test_mode=False)
+        outputs = self.forward(img_gray, img_color, meta, test_mode=False)
 
         log_vars = dict()
 
@@ -304,9 +297,9 @@ class DeOldify(BaseModel):
         log_vars.pop('loss', None)  # remove the unnecessary 'loss'
         results = dict(
             log_vars=log_vars,
-            num_samples=len(outputs['image_grey_real']),
+            num_samples=len(outputs['image_gray_real']),
             results=dict(
-                image_grey_real=outputs['image_grey_real'].cpu(),
+                image_gray_real=outputs['image_gray_real'].cpu(),
                 image_color_fake=outputs['image_color_fake'].cpu(),
                 image_color_real=outputs['image_color_real'].cpu()))
 
@@ -323,10 +316,11 @@ class DeOldify(BaseModel):
             dict: Dict of evaluation results for validation.
         """
         # data
-        img_grey = data_batch['img_grey']
+        img_gray = data_batch['img_gray']
         img_color = data_batch['img_color']
         meta = data_batch['meta']
 
         # forward generator
-        results = self.forward(img_grey, img_color, meta, test_mode=True, **kwargs)
+        results = self.forward(img_gray, img_color, meta,
+                               test_mode=True, **kwargs)
         return results

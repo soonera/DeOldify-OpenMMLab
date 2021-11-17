@@ -1,0 +1,30 @@
+{
+  // 使用 IntelliSense 了解相关属性。 
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Python: 当前文件",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      // "args": [
+      //   "work_dirs/stable/source/1.jpg",
+      //   "configs/deoldify_stable_configs.py",
+      //   "checkpoints/ColorizeStable_gen.pth",
+      //   "--out", "work_dirs/stable/result/1.png",
+      //   "--show"
+      // ]
+      "args": [
+        "work_dirs/video/source/test.mp4",
+        "configs/deoldify_video_configs.py",
+        "checkpoints/ColorizeVideo_gen.pth",
+        "--out", "work_dirs/video/result/test.mp4",
+        "--show"
+      ]
+    }
+  ]
+}

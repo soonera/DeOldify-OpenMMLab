@@ -1,7 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-
 from argparse import ArgumentParser
+import mmcv
 from apis import (colorization_inference, init_colorization_model)
+from mmedit.core import tensor2img
 
 
 def parse_args():
@@ -21,12 +22,16 @@ def main(args):
     # build the model from a config file and a checkpoint file
     model = init_colorization_model(args.config, args.checkpoint, device=args.device)
     # test a single image
-    result = colorization_inference(model, args.img)
+    output = colorization_inference(model, args.img)
+    output = tensor2img(output)
+    
     # show the results
     if args.show:
-        result.show()
+        mmcv.imshow(output, 'predicted colorization result')
+
+    # save
     if isinstance(args.out, str):
-        result.save(args.out)
+        mmcv.imwrite(output, args.out)
 
 
 if __name__ == '__main__':

@@ -42,7 +42,13 @@ model = dict(
         real_label_val=1.0,
         fake_label_val=0.0,
         loss_weight=1.0),
-    perceptual_loss=dict(type='PerceptualLoss', loss_weight=100.0, reduction='mean')
+    perceptual_loss=dict(
+        type='PerceptualLoss',
+        layer_weights={'29': 1.0},
+        vgg_type='vgg19',
+        perceptual_weight=1e-2,
+        style_weight=0,
+        criterion='mse'),
     )
 
 train_cfg = dict()
@@ -54,33 +60,65 @@ train_pipeline = []
 test_pipeline = [
     dict(
         type='LoadImageFromFile',
-        key='gt_img',
+        key='img_gray',
         # flag='grayscale',
         backend='pillow'
     ),
     dict(
         type='Resize',
-        keys=['gt_img'],
+        keys=['img_gray'],
         scale=(160, 160),
         keep_ratio=False,
         backend='pillow'
     ),
     dict(
         type='RescaleToZeroOne',
-        keys=['gt_img']
+        keys=['img_gray']
     ),
     dict(
         type='Normalize',
-        keys=['gt_img'],
+        keys=['img_gray'],
         mean=[0.4850, 0.4560, 0.4060],
         std=[0.2290, 0.2240, 0.2250],
         to_rgb=False),
     dict(
         type='Collect',
-        keys=['gt_img'],
-        meta_keys=['gt_img_path']),
+        keys=['img_gray'],
+        meta_keys=['img_gray_path']),
     dict(type='ImageToTensor',
-         keys=['gt_img']),
+         keys=['img_gray']),
+]
+
+demo_pipeline = [
+    dict(
+        type='LoadImageFromFile',
+        key='img_gray',
+        # flag='grayscale',
+        backend='pillow'
+    ),
+    dict(
+        type='Resize',
+        keys=['img_gray'],
+        scale=(160, 160),
+        keep_ratio=False,
+        backend='pillow'
+    ),
+    dict(
+        type='RescaleToZeroOne',
+        keys=['img_gray']
+    ),
+    dict(
+        type='Normalize',
+        keys=['img_gray'],
+        mean=[0.4850, 0.4560, 0.4060],
+        std=[0.2290, 0.2240, 0.2250],
+        to_rgb=False),
+    dict(
+        type='Collect',
+        keys=['img_gray'],
+        meta_keys=['img_gray_path']),
+    dict(type='ImageToTensor',
+         keys=['img_gray']),
 ]
 
 data = dict(
